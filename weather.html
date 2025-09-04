@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MohsinXtancial — Global Weather Intelligence Platform</title>
+  <meta name="description" content="MohsinXtancial Weather — Global Weather Intelligence Platform" />
+  <style>
+    :root {
+      --bg:#0b0613;            /* deep space */
+      --card:#191026cc;        /* glass */
+      --muted:#a78bfa;         /* purple 300 */
+      --primary:#c084fc;       /* purple 400 */
+      --accent:#8b5cf6;        /* purple 500 */
+      --text:#f5ecff;          /* near white */
+      --ok:#34d399;            /* green */
+      --warn:#f59e0b;          /* amber */
+      --err:#ef4444;           /* red */
+      --shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 80px rgba(139,92,246,.25) inset;
+      --radius: 20px;
+    }*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  color:var(--text);
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(124,58,237,.35), transparent 60%),
+              radial-gradient(1200px 800px at 120% 10%, rgba(168,85,247,.25), transparent 60%),
+              var(--bg);
+  background-attachment: fixed;
+}
+
+.container{max-width:1100px;margin:0 auto;padding:28px}
+
+header{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center;margin-bottom:20px}
+header h1{font-size:clamp(28px,5vw,44px);margin:0;font-weight:800;letter-spacing:.5px}
+header h1 .brand{color:var(--primary);text-shadow:0 2px 30px rgba(192,132,252,.45)}
+header .subtitle{opacity:.8}
+header .clock{font-variant-numeric:tabular-nums;opacity:.8}
+
+.searchbar{
+  display:flex;gap:10px;align-items:center;max-width:680px;width:100%;margin:18px auto 0;
+  background: linear-gradient(135deg, rgba(24,17,39,.65), rgba(24,17,39,.45));
+  border:1px solid rgba(167,139,250,.25);
+  box-shadow: var(--shadow);
+  padding:10px 10px 10px 14px;border-radius:999px
+}
+.searchbar input{
+  flex:1;background:transparent;border:0;outline:none;color:var(--text);
+  font-size:16px;padding:10px
+}
+.btn{cursor:pointer;border:0;padding:12px 18px;border-radius:999px;font-weight:700;color:#120a1e;
+  background:linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow:0 6px 20px rgba(139,92,246,.45);
+}
+.btn:active{transform:translateY(1px)}
+
+.alert{display:none;margin:18px auto 0;max-width:780px;padding:14px 16px;border-radius:14px;
+  background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fecaca;backdrop-filter: blur(6px)}
+
+/* Main panel */
+.panel{margin-top:24px;display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
+@media (max-width:900px){.panel{grid-template-columns:1fr}}
+
+.card{background:linear-gradient(135deg, rgba(25,16,38,.85), rgba(25,16,38,.65));
+  border:1px solid rgba(167,139,250,.15);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+
+.city-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.city-name{font-size:24px;font-weight:800}
+.pill{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.25)}
+
+.current-wrap{display:flex;align-items:center;gap:18px}
+.temp{font-size:52px;font-weight:900}
+.emoji{font-size:40px}
+.meta{opacity:.85}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (max-width:600px){.grid{grid-template-columns:1fr}}
+
+.kv{display:flex;align-items:center;justify-content:space-between;padding:12px 12px;border-radius:14px;
+  background:rgba(35,25,55,.55);border:1px solid rgba(167,139,250,.12)}
+.kv label{opacity:.8}
+.kv span{font-weight:700}
+
+.section-title{display:flex;gap:10px;align-items:center;margin:26px 0 12px;font-weight:800;opacity:.9}
+
+.popular{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:900px){.popular{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.popular{grid-template-columns:1fr}}
+
+.pop-card{cursor:pointer;transition:transform .2s ease, box-shadow .2s ease}
+.pop-card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(139,92,246,.20)}
+
+.pop-row{display:flex;align-items:center;justify-content:space-between}
+.pop-name{font-weight:800}
+.pop-temp{font-size:24px;font-weight:900}
+.pop-emoji{font-size:24px}
+.pop-extra{opacity:.8;font-size:12px;margin-top:6px}
+
+footer{opacity:.6;text-align:center;margin:28px 0}
+a{color:var(--muted);text-decoration:none}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><span class="brand">MohsinXtancial</span></h1>
+      <div class="subtitle">Global Weather Intelligence Platform</div>
+      <div class="clock" id="clock"></div><div class="searchbar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input id="q" placeholder="Search city e.g., Lahore" aria-label="Search city" />
+    <button class="btn" id="btnSearch">Search</button>
+  </div>
+  <div class="alert" id="alert"></div>
+</header>
+
+<section class="panel">
+  <div class="card" id="mainCard">
+    <div class="city-head">
+      <div>
+        <div class="city-name" id="cityName">—</div>
+        <div class="pill" id="coords">—</div>
+      </div>
+      <div class="pill" id="timezone">—</div>
+    </div>
+
+    <div class="current-wrap">
+      <div class="emoji" id="emoji">⛅</div>
+      <div class="temp" id="temp">—°</div>
+      <div class="meta" id="summary">—</div>
+    </div>
+
+    <div class="grid" style="margin-top:14px">
+      <div class="kv"><label>Feels like</label><span id="feels">—</span></div>
+      <div class="kv"><label>Humidity</label><span id="humidity">—</span></div>
+      <div class="kv"><label>Wind</label><span id="wind">—</span></div>
+      <div class="kv"><label>Visibility</label><span id="visibility">—</span></div>
+      <div class="kv"><label>Pressure</label><span id="pressure">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🌍 Popular Cities</div>
+    <div class="popular" id="popular"></div>
+  </div>
+</section>
+
+<footer>Built with ❤️ for Mohsin. Data by <a href="#" title="Open‑Meteo">Open‑Meteo</a>.</footer>
+
+  </div>  <script>
+    // ===== Helpers =====
+    const $ = (id)=>document.getElementById(id);
+
+    function tickClock(){
+      const now = new Date();
+      $('clock').textContent = now.toLocaleString();
+    }
+    setInterval(tickClock, 1000); tickClock();
+
+    const WEATHER_DESC = {
+      0: 'Clear sky',
+      1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Fog', 48:'Depositing rime fog',
+      51:'Light drizzle',53:'Moderate drizzle',55:'Dense drizzle',
+      56:'Freezing drizzle',57:'Freezing drizzle',
+      61:'Slight rain',63:'Moderate rain',65:'Heavy rain',
+      66:'Freezing rain',67:'Freezing rain',
+      71:'Slight snow',73:'Moderate snow',75:'Heavy snow',
+      77:'Snow grains',
+      80:'Rain showers',81:'Rain showers',82:'Violent rain showers',
+      85:'Snow showers',86:'Heavy snow showers',
+      95:'Thunderstorm',96:'Thunderstorm w/ hail',99:'Thunderstorm w/ heavy hail'
+    };
+
+    function codeToEmoji(code){
+      if([0,1].includes(code)) return '☀️';
+      if([2].includes(code)) return '🌤️';
+      if([3].includes(code)) return '☁️';
+      if([45,48].includes(code)) return '🌫️';
+      if([51,53,55,61,63,65,80,81,82].includes(code)) return '🌧️';
+      if([66,67].includes(code)) return '🌧️❄️';
+      if([71,73,75,77,85,86].includes(code)) return '❄️';
+      if([95,96,99].includes(code)) return '⛈️';
+      return '🌡️';
+    }
+
+    function kmFormat(km){ return km==null? '—' : `${km.toFixed(0)} km`; }
+
+    // ===== API (Open‑Meteo — no key needed) =====
+    async function geocode(name){
+      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=en&format=json`);
+      if(!r.ok) throw new Error('City not found');
+      const j = await r.json();
+      if(!j.results || !j.results.length) throw new Error('City not found');
+      const c = j.results[0];
+      return { name: `${c.name}${c.admin1? ', '+c.admin1:''}, ${c.country_code}`, lat:c.latitude, lon:c.longitude, tz:c.timezone };
+    }
+
+    async function getWeather(lat,lon){
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,visibility,pressure_msl&timezone=auto`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('Weather fetch failed');
+      return r.json();
+    }
+
+    function renderMain(meta, data){
+      $('cityName').textContent = meta.name;
+      $('coords').textContent = `${meta.lat.toFixed(2)}, ${meta.lon.toFixed(2)}`;
+      $('timezone').textContent = data.timezone || meta.tz || '—';
+
+      const c = data.current;
+      $('temp').textContent = Math.round(c.temperature_2m) + '°C';
+      $('emoji').textContent = codeToEmoji(c.weather_code);
+      $('summary').textContent = WEATHER_DESC[c.weather_code] || 'Current conditions';
+      $('feels').textContent = Math.round(c.apparent_temperature) + '°C';
+      $('humidity').textContent = Math.round(c.relative_humidity_2m) + '%';
+      $('wind').textContent = Math.round(c.wind_speed_10m) + ' km/h';
+      $('visibility').textContent = kmFormat((c.visibility||0)/1000);
+      $('pressure').textContent = Math.round(c.pressure_msl) + ' hPa';
+    }
+
+    function showError(msg){
+      const el = $('alert');
+      el.textContent = msg; el.style.display = 'block';
+      setTimeout(()=>{ el.style.display = 'none'; }, 5000);
+    }
+
+    async function searchCity(){
+      try{
+        const q = $('q').value.trim();
+        if(!q){ showError('Type a city name.'); return; }
+        const meta = await geocode(q);
+        const w = await getWeather(meta.lat, meta.lon);
+        renderMain(meta, w);
+      }catch(e){
+        console.error(e); showError(e.message || 'Search failed');
+      }
+    }
+
+    $('btnSearch').addEventListener('click', searchCity);
+    $('q').addEventListener('keydown', (e)=>{ if(e.key==='Enter') searchCity(); });
+
+    // ===== Popular Cities =====
+    const POPULAR = [
+      { name:'Lahore, PK', lat:31.55, lon:74.34 },
+      { name:'Karachi, PK', lat:24.86, lon:67.01 },
+      { name:'Islamabad, PK', lat:33.69, lon:73.05 },
+      { name:'London, GB', lat:51.5072, lon:-0.1276 },
+      { name:'New York, US', lat:40.7128, lon:-74.0060 },
+      { name:'Dubai, AE', lat:25.2048, lon:55.2708 },
+      { name:'Tokyo, JP', lat:35.6762, lon:139.6503 },
+      { name:'Sydney, AU', lat:-33.8688, lon:151.2093 },
+      { name:'Paris, FR', lat:48.8566, lon:2.3522 }
+    ];
+
+    async function loadPopular(){
+      const grid = $('popular');
+      grid.innerHTML = '';
+      for(const p of POPULAR){
+        try{
+          const w = await getWeather(p.lat, p.lon);
+          const c = w.current;
+          const card = document.createElement('div');
+          card.className = 'card pop-card';
+          card.innerHTML = `
+            <div class="pop-row">
+              <div class="pop-name">${p.name}</div>
+              <div class="pop-emoji">${codeToEmoji(c.weather_code)}</div>
+            </div>
+            <div class="pop-row" style="margin-top:8px">
+              <div class="pop-extra">${WEATHER_DESC[c.weather_code] || ''}</div>
+              <div class="pop-temp">${Math.round(c.temperature_2m)}°C</div>
+            </div>
+            <div class="pop-extra">💨 ${Math.round(c.wind_speed_10m)} km/h • 💧 ${Math.round(c.relative_humidity_2m)}%</div>
+          `;
+          card.addEventListener('click', ()=>{
+            renderMain({name:p.name, lat:p.lat, lon:p.lon}, w);
+            window.scrollTo({ top:0, behavior:'smooth' });
+          });
+          grid.appendChild(card);
+        }catch(e){
+          console.warn('Failed popular city', p.name, e);
+        }
+      }
+    }
+
+    // Load defaults: render Lahore and fill grid
+    (async function init(){
+      try{
+        const def = POPULAR[0];
+        const w = await getWeather(def.lat, def.lon);
+        renderMain({name:def.name, lat:def.lat, lon:def.lon}, w);
+      }catch(e){ showError('Failed to load default city'); }
+      loadPopular();
+    })();
+  </script></body>
+</html>
